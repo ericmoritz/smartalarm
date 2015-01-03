@@ -43,23 +43,27 @@ definition(
 
 mappings {
     path("/armaway") {
-        action: [ GET: "restArmAway" ]
+        action: [ GET: "apiArmAway" ]
     }
 
     path("/armstay") {
-        action: [ GET: "restArmStay" ]
+        action: [ GET: "apiArmStay" ]
     }
 
     path("/disarm") {
-        action: [ GET: "restDisarm" ]
+        action: [ GET: "apiDisarm" ]
     }
 
     path("/panic") {
-        action: [ GET: "restPanic" ]
+        action: [ GET: "apiPanic" ]
     }
 
     path("/status") {
-        action: [ GET: "restStatus" ]
+        action: [ GET: "apiGetStatus" ]
+    }
+
+    path("/cp") {
+        action: [ GET: "controlPanel" ]
     }
 }
 
@@ -72,6 +76,7 @@ preferences {
     page name:"pageNotifications"
     page name:"pageZoneStatus"
     page name:"pageRemoteControl"
+    page name:"pageControlPanel"
 }
 
 // Show setup page
@@ -82,6 +87,14 @@ def pageSetup() {
         setupInit()
         return pageAbout()
     }
+
+    def hrefControlPanel = [
+        url:        state.restEndpoint + "/cp?access_token=" + state.accessToken,
+        style:      "embedded",
+        title:      "Control Panel",
+        description:"Tap to launch control panel...",
+        required:   false
+    ]
 
     def pageProperties = [
         name:       "pageSetup",
@@ -105,6 +118,7 @@ def pageSetup() {
             if (state.zones.size()) {
                 href "pageZoneStatus", title:"Zone Status", description:"Tap to open"
             }
+            href hrefControlPanel
         }
         section("Setup Menu") {
             href "pageAlarmSettings", title:"Smart Alarm Settings", description:"Tap to open"
@@ -112,6 +126,7 @@ def pageSetup() {
             href "pageZoneSettings", title:"Zone Settings", description:"Tap to open"
             href "pageNotifications", title:"Notification Options", description:"Tap to open"
             href "pageRemoteControl", title:"Remote Control Settings", description:"Tap to open"
+            href "pageControlPanel", title:"Control Panel Settings", description:"Tap to open"
             href "pageAbout", title:"About Smart Alarm", description:"Tap to open"
         }
         section([title:"Options", mobileOnly:true]) {
@@ -120,7 +135,7 @@ def pageSetup() {
     }
 }
 
-// Show 'About' page
+// Show "About" page
 def pageAbout() {
     TRACE("pageAbout()")
 
@@ -156,7 +171,7 @@ def pageAbout() {
     }
 }
 
-// Show zone status page
+// Show "Zone Status" page
 def pageZoneStatus() {
     TRACE("pageZoneStatus()")
 
@@ -256,7 +271,7 @@ def pageSelectZones() {
     }
 }
 
-// Show "Configure Zones" page
+// Show "Zone Settings" page
 def pageZoneSettings() {
     TRACE("pageZoneSettings()")
 
@@ -348,7 +363,7 @@ def pageZoneSettings() {
     }
 }
 
-// Show panel configuration page
+// Show "Smart Alarm Settings" page
 def pageAlarmSettings() {
     TRACE("pageAlarmSettings()")
 
@@ -706,7 +721,7 @@ def pageNotifications() {
     }
 }
 
-// Show "Configure Button Remote" page
+// Show "Remote Control Options" page
 def pageRemoteControl() {
     TRACE("pageRemoteControl()")
 
@@ -774,6 +789,24 @@ def pageRemoteControl() {
             input inputArmStay
             input inputDisarm
             input inputPanic
+        }
+    }
+}
+
+// Show "Control Panel Options" page
+def pageControlPanel() {
+    TRACE("pageControlPanel()")
+
+    def pageProperties = [
+        name:       "pageControlPanel",
+        title:      "Control Panel Options",
+        nextPage:   "pageSetup",
+        install:    false,
+        uninstall:  false
+    ]
+
+    return dynamicPage(pageProperties) {
+        section {
         }
     }
 }
@@ -1117,47 +1150,62 @@ def panic() {
     activateAlarm()
 }
 
-// .../armaway REST endpoint
-def restArmAway() {
-    TRACE("restArmAway()")
+// .../armaway REST API endpoint
+def apiArmAway() {
+    TRACE("apiArmAway()")
 
     armAway()
-    return restStatus()
+    return apiGetStatus()
 }
 
-// .../armstay REST endpoint
-def restArmStay() {
-    TRACE("restArmStay()")
+// .../armstay REST API endpoint
+def apiArmStay() {
+    TRACE("apiArmStay()")
 
     armStay()
-    return restStatus()
+    return apiGetStatus()
 }
 
-// .../disarm REST endpoint
-def restDisarm() {
-    TRACE("restDisarm()")
+// .../disarm REST API endpoint
+def apiDisarm() {
+    TRACE("apiDisarm()")
 
     disarm()
-    return restStatus()
+    return apiGetStatus()
 }
 
-// .../panic REST endpoint
-def restPanic() {
-    TRACE("restPanic()")
+// .../panic REST API endpoint
+def apiPanic() {
+    TRACE("apiPanic()")
 
     panic()
-    return restStatus()
+    return apiGetStatus()
 }
 
-// .../status REST endpoint
-def restStatus() {
-    TRACE("restStatus()")
+// .../status REST API endpoint
+def apiGetStatus() {
+    TRACE("apiGetStatus()")
 
     def status = [:]
     status.status = state.armed ? (state.stay ? "armed stay" : "armed away") : "disarmed"
     status.alarm = state.alarm
 
     return status
+}
+
+// .../cp REST API endpoint
+def controlPanel() {
+    TRACE("controlPanel()")
+
+    def html = '''\
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head><title>Smart Alarm</title></head>
+<body><h2>Coming soon...</h2></body>
+</html>
+'''
+
+    render contentType:"text/html", data: html
 }
 
 def activateAlarm() {

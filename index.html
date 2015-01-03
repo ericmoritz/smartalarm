@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Smart Alarm : The ultimate home security application for SmartThings.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Smart Alarm</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/statusbits/smartalarm">View on GitHub</a>
+
+          <h1 id="project_title">Smart Alarm</h1>
+          <h2 id="project_tagline">The ultimate home security application for SmartThings.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/statusbits/smartalarm/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/statusbits/smartalarm/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Smart Alarm is a versatile and highly configurable home security application
+for the <a href="http://fbuy.me/bb9pe">SmartThings</a> home automation system.</p>
+
+<p><em>Please contribute to the development of this app by making donation via PayPal.</em></p>
+
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=ATTTMV7JV2W9W"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="PayPal"></a></p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<ul>
+<li>Two arming modes - Away and Stay.</li>
+<li>Unlimited number of security zones (sensors) - contact, motion, moisture
+or smoke.</li>
+<li>Each security zone can be designated as Exterior (armed in both Away and
+Stay modes), Interior (armed in Away mode only), Entrance (same as Exterior,
+but uses entry and exit delays) or Alert (always armed).</li>
+<li>Optional entry and exit delays for the Entrance zones.</li>
+<li>Zone bypass allows quickly exclude selected zones.</li>
+<li>When an alarm is set off, Smart Alarm can turn on sirens and switches as
+well as execute chosen 'Hello, Home' action.</li>
+<li>Smart Alarm can send you push notifications and text messages when it's
+armed, disarmed or when an alarm is triggered.</li>
+<li>Voice notifications are available with compatible audio devices, e.g.
+<a href="https://github.com/statusbits/smartthings-vlc">VLC Thing</a>
+</li>
+<li>Silent mode disables sirens and switches, but leaves push notifications
+and text messages on.</li>
+</ul>
+
+<h3>
+<a id="arming-and-disarming" class="anchor" href="#arming-and-disarming" aria-hidden="true"><span class="octicon octicon-link"></span></a>Arming and Disarming</h3>
+
+<p>Smart Alarm can be armed and disarmed in several different ways:</p>
+
+<ol>
+<li>By assigning home <em>Modes</em>. For example, you can configure Smart Alarm to
+arm in Away mode when the home Mode is set to 'Away', to arm in Stay mode when
+the home Mode is set to 'Night' and disarm when the home Mode is set to 'Home'.
+Using home Mode to arm and disarm Smart Alarm is a very flexible and powerful
+technique because home modes can be changed by other Smart Apps and 'Hello,
+Home' actions. For example, 'Good Night!' action activates the 'Night' mode,
+thus automatically arming Smart Alarm in Stay mode.</li>
+<li>Using a remote control, such as
+<a href="http://www.amazon.com/Aeon-Labs-DSA03202-v1-Minimote/dp/B00KU7ERAW">Aeon Labs Minimote</a>
+</li>
+<li>Using REST API endpoints. Smart Alarm provides REST endpoints to allow any
+web client to arm, disarm and trigger panic alarm using HTTP GET request. This
+feature can be used to integrate Smart Alarm into variety of Web dashboards
+and remote control web apps.</li>
+</ol>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Smart Alarm maintained by <a href="https://github.com/statusbits">statusbits</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

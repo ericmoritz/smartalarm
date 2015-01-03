@@ -10,25 +10,28 @@ for the [SmartThings](http://fbuy.me/bb9pe) home automation system.
 ### Features
 
 * Two arming modes - Away and Stay.
-* Unlimited number of sensors (contact, motion, moisture or smoke).
-* Each sensor represents a security zone that be designated as Exterior (armed
-in both Away and Stay modes), Interior (armed in Away mode only), Alert
-(always armed) and Entrance (same as Exterior, but uses entry and exit
-delays).
+* Unlimited number of security zones (sensors) - contact, motion, moisture
+or smoke.
+* Each security zone can be designated as Exterior (armed in both Away and
+Stay modes), Interior (armed in Away mode only), Entrance (same as Exterior,
+but uses entry and exit delays) or Alert (always armed).
 * Optional entry and exit delays for the Entrance zones.
 * Zone bypass allows quickly exclude selected zones.
-* When alarm is set off, Smart Alarm can execute selected 'Hello, Home'
-action, turn on sirens and light switches, send push notifications and text
-messages.
-* Silent mode disables sirens and switches, but leaves push notifications and
-text messages on.
+* When an alarm is set off, Smart Alarm can turn on sirens and switches as
+well as execute chosen 'Hello, Home' action.
+* Smart Alarm can send you push notifications and text messages when it's
+armed, disarmed or when an alarm is triggered.
+* Voice notifications are available with compatible audio devices, e.g.
+[VLC Thing](https://github.com/statusbits/smartthings-vlc)
+* Silent mode disables sirens and switches, but leaves push notifications
+and text messages on.
 
 
 ### Arming and Disarming
 
 Smart Alarm can be armed and disarmed in several different ways:
 
-1. By assigning home 'Modes'. For example, you can configure Smart Alarm to
+1. By assigning home *Modes*. For example, you can configure Smart Alarm to
 arm in Away mode when the home Mode is set to 'Away', to arm in Stay mode when
 the home Mode is set to 'Night' and disarm when the home Mode is set to 'Home'.
 Using home Mode to arm and disarm Smart Alarm is a very flexible and powerful

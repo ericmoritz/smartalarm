@@ -1,11 +1,11 @@
 /**
- *  Smart Alarm.
+ *  Smart Alarm is a versatile and highly configurable home security
+ *  for the SmartThings.
  *
- *  Smart Alarm turns SmartThings into a versatile home security system.
- *  Please visit <https://github.com/statusbits/smartalarm> for more
+ *  Please visit <http://statusbits.github.io/smartalarm/> for more
  *  information.
  *
- *  Version 2.2.1 (2014-12-06)
+ *  Version 2.2.3 (2015-01-03)
  *
  *  The latest version of this file can be found on GitHub at:
  *  <https://github.com/statusbits/smartalarm>
@@ -34,7 +34,7 @@ definition(
     name: "Smart Alarm",
     namespace: "statusbits",
     author: "geko@statusbits.com",
-    description: "Turn SmartThings into a versatile home security system.",
+    description: "The ultimate home security application for SmartThings.",
     category: "Safety & Security",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/App-IsItSafe.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/App-IsItSafe@2x.png",
@@ -124,9 +124,17 @@ def pageSetup() {
 def pageAbout() {
     TRACE("pageAbout()")
 
-    def textAbout =
-        "Smart Alarm turns SmartThings into a versatile home " +
-        "security system."
+    def textContribute =
+        "Please contribute to the development of this app by making " +
+        "donation to geko@statusbits.com via PayPal."
+
+    def hrefInfo = [
+        url:        "http://statusbits.github.io/smartalarm/",
+        style:      "embedded",
+        title:      "Tap here for more information...",
+        description:"http://statusbits.github.io/smartalarm/",
+        required:   false,
+    ]
 
     def pageProperties = [
         name:       "pageAbout",
@@ -138,8 +146,9 @@ def pageAbout() {
 
     return dynamicPage(pageProperties) {
         section {
-            paragraph textAbout
             paragraph "${textVersion()}\n${textCopyright()}"
+            href hrefInfo
+            paragraph textContribute
         }
         section("License") {
             paragraph textLicense()
@@ -929,9 +938,11 @@ def resetPanel() {
     TRACE("resetPanel()")
 
     unschedule()
-    alarms*.off()
+    settings.alarms*.off()
+    //settings.switches*.off()
 
     // only turn back off those switches that we turned on
+    TRACE("offSwitches: ${state.offSwitches}")
     if (state.offSwitches) {
         state.offSwitches*.off()
         state.offSwitches = []
@@ -1148,12 +1159,15 @@ def activateAlarm() {
 
     // Activate alarms and switches
     if (!settings.silent) {
-        alarms*.both()
+        settings.alarms*.both()
+        //settings.switches*.on()
 
         // Only turn on those switches that are currently off
-        state.offSwitches = switches.findAll { it?.currentSwitch == "off" }
-        if (state.offSwitches) {
-            state.offSwitches*.on()
+        def switchesOn = settings.switches?.findAll { it?.currentSwitch == "off" }
+        TRACE("switchesOn: ${switchesOn}")
+        if (switchesOn) {
+            switchesOn*.on()
+            state.offSwitches = switchesOn
         }
     }
 
@@ -1364,7 +1378,7 @@ private def myRunIn(delay_s, func) {
 }
 
 private def textVersion() {
-    def text = "Version 2.2.1"
+    def text = "Version 2.2.3"
 }
 
 private def textCopyright() {
@@ -1386,10 +1400,10 @@ private def textLicense() {
 }
 
 private def TRACE(message) {
-    //log.debug message
+    log.debug message
 }
 
 private def STATE() {
-    //log.trace "settings: ${settings}"
-    //log.trace "state: ${state}"
+    log.trace "settings: ${settings}"
+    log.trace "state: ${state}"
 }

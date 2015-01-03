@@ -33,11 +33,12 @@ Smart Alarm can be armed and disarmed in several different ways:
 
 1. By assigning home *Modes*. For example, you can configure Smart Alarm to
 arm in Away mode when the home Mode is set to 'Away', to arm in Stay mode when
-the home Mode is set to 'Night' and disarm when the home Mode is set to 'Home'.
-Using home Mode to arm and disarm Smart Alarm is a very flexible and powerful
-technique because home modes can be changed by other Smart Apps and 'Hello,
-Home' actions. For example, 'Good Night!' action activates the 'Night' mode,
-thus automatically arming Smart Alarm in Stay mode.
+the home Mode is set to 'Night' and to disarm when the home Mode is set to
+'Home'. Using home Mode to arm and disarm Smart Alarm is a very flexible and
+powerful technique because home modes can be changed by other Smart Apps and
+'Hello, Home' actions (also known as *phrases*). For example, 'Good Night!'
+action activates the 'Night' mode, thus automatically arming Smart Alarm in
+Stay mode.
 2. Using a remote control, such as
 [Aeon Labs Minimote](http://www.amazon.com/Aeon-Labs-DSA03202-v1-Minimote/dp/B00KU7ERAW)
 3. Using REST API endpoints. Smart Alarm provides REST endpoints to allow any
@@ -108,6 +109,10 @@ appears below the menu ribbon. Tap it and follow setup instructions.
 
 
 ### Revision History
+
+**Version 2.2.3. Released TBD**
+* Can now take camera snapshots when alarm is triggered.
+* Miscellaneous bug fixes.
 
 **Version 2.2.1. Released 2014-12-06**
 * Added option to disable entry delay in Stay mode.

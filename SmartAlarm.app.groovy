@@ -5,7 +5,7 @@
  *  Please visit <http://statusbits.github.io/smartalarm/> for more
  *  information.
  *
- *  Version 2.2.3 (01/02/2015)
+ *  Version 2.2.3 (01/03/2015)
  *
  *  The latest version of this file can be found on GitHub at:
  *  <https://github.com/statusbits/smartalarm>
@@ -67,11 +67,11 @@ preferences {
     page name:"pageSetup"
     page name:"pageAbout"
     page name:"pageSelectZones"
-    page name:"pageConfigureZones"
+    page name:"pageZoneSettings"
     page name:"pageAlarmSettings"
     page name:"pageNotifications"
     page name:"pageZoneStatus"
-    page name:"pageButtonRemote"
+    page name:"pageRemoteControl"
 }
 
 // Show setup page
@@ -107,11 +107,11 @@ def pageSetup() {
             }
         }
         section("Setup Menu") {
-            href "pageAlarmSettings", title:"Alarm Settings", description:"Tap to open"
+            href "pageAlarmSettings", title:"Smart Alarm Settings", description:"Tap to open"
             href "pageSelectZones", title:"Add/Remove Zones", description:"Tap to open"
-            href "pageConfigureZones", title:"Configure Zones", description:"Tap to open"
+            href "pageZoneSettings", title:"Zone Settings", description:"Tap to open"
             href "pageNotifications", title:"Notification Options", description:"Tap to open"
-            href "pageButtonRemote", title:"Configure Remote Control", description:"Tap to open"
+            href "pageRemoteControl", title:"Remote Control Settings", description:"Tap to open"
             href "pageAbout", title:"About Smart Alarm", description:"Tap to open"
         }
         section([title:"Options", mobileOnly:true]) {
@@ -199,7 +199,7 @@ def pageZoneStatus() {
 
 // Show "Add/Remove Zones" page
 def pageSelectZones() {
-    TRACE("pageConfigureZones()")
+    TRACE("pageZoneSettings()")
 
     def helpPage =
         "A security zone is an area or your property protected by one of " +
@@ -257,8 +257,8 @@ def pageSelectZones() {
 }
 
 // Show "Configure Zones" page
-def pageConfigureZones() {
-    TRACE("pageConfigureZones()")
+def pageZoneSettings() {
+    TRACE("pageZoneSettings()")
 
     def helpPage =
         "Each zone can be designated as Exterior (default), Interior, " +
@@ -319,8 +319,8 @@ def pageConfigureZones() {
     ]
 
     def pageProperties = [
-        name:       "pageConfigureZones",
-        title:      "Configure Zones",
+        name:       "pageZoneSettings",
+        title:      "Zone Settings",
         nextPage:   "pageSetup",
         uninstall:  state.installed
     ]
@@ -468,7 +468,7 @@ def pageAlarmSettings() {
 
     def pageProperties = [
         name:       "pageAlarmSettings",
-        title:      "Configure Smart Alarm",
+        title:      "Smart Alarm Settings",
         nextPage:   "pageSetup",
         uninstall:  state.installed
     ]
@@ -707,8 +707,8 @@ def pageNotifications() {
 }
 
 // Show "Configure Button Remote" page
-def pageButtonRemote() {
-    TRACE("pageButtonRemote()")
+def pageRemoteControl() {
+    TRACE("pageRemoteControl()")
 
     def textHelp =
         "You can use remote controls such as Aeon Labs Minimote to arm " +
@@ -759,8 +759,8 @@ def pageButtonRemote() {
     ]
 
     def pageProperties = [
-        name:       "pageButtonRemote",
-        title:      "Configure Remote Control",
+        name:       "pageRemoteControl",
+        title:      "Remote Control Settings",
         nextPage:   "pageSetup",
         install:    false,
         uninstall:  false
@@ -1392,7 +1392,7 @@ private def myRunIn(delay_s, func) {
 }
 
 private def textVersion() {
-    def text = "Version 2.2.3 (01/02/2015)"
+    def text = "Version 2.2.3 (01/03/2015)"
 }
 
 private def textCopyright() {

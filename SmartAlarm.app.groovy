@@ -5,7 +5,7 @@
  *  Please visit <http://statusbits.github.io/smartalarm/> for more
  *  information.
  *
- *  Version 2.2.3 (2015-01-03)
+ *  Version 2.2.3 (01/02/2015)
  *
  *  The latest version of this file can be found on GitHub at:
  *  <https://github.com/statusbits/smartalarm>
@@ -124,7 +124,8 @@ def pageSetup() {
 def pageAbout() {
     TRACE("pageAbout()")
 
-    def textContribute =
+    def textAbout =
+        "${textVersion()}\n${textCopyright()}\n\n" +
         "Please contribute to the development of this app by making " +
         "donation to geko@statusbits.com via PayPal."
 
@@ -146,9 +147,8 @@ def pageAbout() {
 
     return dynamicPage(pageProperties) {
         section {
-            paragraph "${textVersion()}\n${textCopyright()}"
+            paragraph textAbout
             href hrefInfo
-            paragraph textContribute
         }
         section("License") {
             paragraph textLicense()
@@ -1378,11 +1378,11 @@ private def myRunIn(delay_s, func) {
 }
 
 private def textVersion() {
-    def text = "Version 2.2.3"
+    def text = "Version 2.2.3 (01/02/2015)"
 }
 
 private def textCopyright() {
-    def text = "Copyright (c) 2014 Statusbits.com"
+    def text = "Copyright © 2014 Statusbits.com"
 }
 
 private def textLicense() {

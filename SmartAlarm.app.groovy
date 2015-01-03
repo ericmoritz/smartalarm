@@ -1055,8 +1055,10 @@ def onButtonPushed(evt) {
     if (button) {
         TRACE("Button '${button}' was pushed.")
         def action = state.buttonActions["${button}"]
-        log.trace "Executing button action ${action}()"
-        "${action}"()
+        if (action) {
+            log.trace "Executing button action ${action}()"
+            "${action}"()
+        }
     }
 }
 

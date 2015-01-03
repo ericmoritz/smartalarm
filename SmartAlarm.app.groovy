@@ -126,7 +126,7 @@ def pageAbout() {
 
     def textAbout =
         "${textVersion()}\n${textCopyright()}\n\n" +
-        "Please contribute to the development of this app by making " +
+        "You can contribute to the development of this app by making " +
         "donation to geko@statusbits.com via PayPal."
 
     def hrefInfo = [
@@ -370,7 +370,7 @@ def pageAlarmSettings() {
 
     def helpAlarm =
         "When an alarm is set off, Smart Alarm can turn on sirens and light" +
-        "switches and/or execute a 'Hello, Home' action."
+        "switches, take camera snapshots and execute a 'Hello, Home' action."
 
     def helpSilent =
         "Enable Silent mode if you wish to temporarily disable sirens and " +
@@ -451,6 +451,14 @@ def pageAlarmSettings() {
         required:       false
     ]
 
+    def inputCameras = [
+        name:           "cameras",
+        type:           "capability.imageCapture",
+        title:          "Take camera snapshots",
+        multiple:       true,
+        required:       false
+    ]
+
     def inputSilent = [
         name:           "silent",
         type:           "bool",
@@ -485,6 +493,7 @@ def pageAlarmSettings() {
             paragraph helpAlarm
             input inputAlarms
             input inputSwitches
+            input inputCameras
             input inputHelloHome
             paragraph helpSilent
             input inputSilent
@@ -1170,6 +1179,9 @@ def activateAlarm() {
             state.offSwitches = switchesOn
         }
     }
+
+    // Take camera snapshots
+    settings.cameras*.take()
 
     // Execute Hello Home action
     if (settings.helloHomeAction) {

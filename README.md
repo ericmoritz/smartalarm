@@ -3,7 +3,7 @@
 Smart Alarm is a versatile and highly configurable home security application
 for the [SmartThings](http://fbuy.me/bb9pe) home automation system.
 
-*Please contribute to the development of this app by making donation via PayPal.*
+*You can contribute to the development of this app by making donation via PayPal.*
 
 [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ATTTMV7JV2W9W)
 

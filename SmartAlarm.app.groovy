@@ -86,6 +86,7 @@ preferences {
     page name:"pageZoneSettings"
     page name:"pageAlarmSettings"
     page name:"pageNotifications"
+    page name:"pageVoiceOptions"
     page name:"pageZoneStatus"
     page name:"pageRemoteControl"
     page name:"pageRestApiOptions"
@@ -95,13 +96,21 @@ preferences {
 def pageSetup() {
     TRACE("pageSetup()")
 
-    if (state.installed == null) {
+    if (state.version != buildNumber()) {
         setupInit()
         return pageAbout()
     }
 
+    def alarmStatus
+    if (state.armed) {
+        alarmStatus = "armed "
+        alarmStatus += state.stay ? "Stay" : "Away"
+    } else {
+        alarmStatus = "disarmed"
+    }
+
     def hrefControlPanel = [
-        url:        state.restEndpoint + "/cp?access_token=" + state.accessToken,
+        url:        getControlPanelUrl(),
         style:      "embedded",
         title:      "Control Panel",
         description:"Tap to launch control panel...",
@@ -116,29 +125,22 @@ def pageSetup() {
         uninstall:  state.installed
     ]
 
-    def alarmStatus
-    if (state.armed) {
-        alarmStatus = "armed "
-        alarmStatus += state.stay ? "Stay" : "Away"
-    } else {
-        alarmStatus = "disarmed"
-    }
-
     return dynamicPage(pageProperties) {
         section {
             paragraph "Smart Alarm is ${alarmStatus}"
             if (state.zones.size()) {
                 href "pageZoneStatus", title:"Zone Status", description:"Tap to open"
             }
-            if (isRestApiEnabled()) {
-                href hrefControlPanel
-            }
+            //if (isRestApiEnabled()) {
+            //    href hrefControlPanel
+            //}
         }
         section("Setup Menu") {
             href "pageAlarmSettings", title:"Smart Alarm Settings", description:"Tap to open"
             href "pageSelectZones", title:"Add/Remove Zones", description:"Tap to open"
             href "pageZoneSettings", title:"Zone Settings", description:"Tap to open"
             href "pageNotifications", title:"Notification Options", description:"Tap to open"
+            href "pageVoiceOptions", title:"Voice Notification Options", description:"Tap to open"
             href "pageRemoteControl", title:"Remote Control Settings", description:"Tap to open"
             href "pageRestApiOptions", title:"REST API Options", description:"Tap to open"
             href "pageAbout", title:"About Smart Alarm", description:"Tap to open"
@@ -537,8 +539,8 @@ def pageNotifications() {
     def helpAbout =
         "Smart Alarm has multiple ways of notifying you when its armed, " +
         "disarmed or when an alarm is set off, including Push " +
-        "notifications, SMS (text) messages or voice (text-to-speech) " +
-        "notification."
+        "notifications, SMS (text) messages and Pushbullet notification " +
+        "service."
 
     def inputPushAlarm = [
         name:           "pushMessage",
@@ -638,6 +640,79 @@ def pageNotifications() {
         defaultValue:   false
     ]
 
+    def inputPushbulletDevice = [
+        name:           "pushbullet",
+        type:           "device.pushbullet",
+        title:          "Use these Pushbullet devices",
+        multiple:       true,
+        required:       false
+    ]
+
+    def inputPushbulletAlarm = [
+        name:           "pushbulletAlarm",
+        type:           "bool",
+        title:          "Notify on Alarm",
+        defaultValue:   true
+    ]
+
+    def inputPushbulletStatus = [
+        name:           "pushbulletStatus",
+        type:           "bool",
+        title:          "Notify on Status Change",
+        defaultValue:   true
+    ]
+
+    def pageProperties = [
+        name:       "pageNotifications",
+        title:      "Notification Options",
+        nextPage:   "pageSetup",
+        uninstall:  state.installed
+    ]
+
+    return dynamicPage(pageProperties) {
+        section {
+            paragraph helpAbout
+        }
+        section("Push Notifications") {
+            input inputPushAlarm
+            input inputPushStatus
+        }
+        section("Text Message (SMS) #1") {
+            input inputPhone1
+            input inputPhone1Alarm
+            input inputPhone1Status
+        }
+        section("Text Message (SMS) #2") {
+            input inputPhone2
+            input inputPhone2Alarm
+            input inputPhone2Status
+        }
+        section("Text Message (SMS) #3") {
+            input inputPhone3
+            input inputPhone3Alarm
+            input inputPhone3Status
+        }
+        section("Text Message (SMS) #4") {
+            input inputPhone4
+            input inputPhone4Alarm
+            input inputPhone4Status
+        }
+        section("Pushbullet Notifications") {
+            input inputPushbulletDevice
+            input inputPushbulletAlarm
+            input inputPushbulletStatus
+        }
+    }
+}
+
+// Show "Voice Notification Options" page
+def pageVoiceOptions() {
+    TRACE("pageVoiceOptions()")
+
+    def helpAbout =
+        "Smart Alarm can utilize available speech synthesis devices (e.g. " +
+        "VLC Thing) to provide voice notifications."
+
     def inputSpeechDevice = [
         name:           "speechSynth",
         type:           "capability.speechSynthesis",
@@ -698,32 +773,6 @@ def pageNotifications() {
     return dynamicPage(pageProperties) {
         section {
             paragraph helpAbout
-        }
-        section("Push Notifications") {
-            input inputPushAlarm
-            input inputPushStatus
-        }
-        section("Text Message (SMS) #1") {
-            input inputPhone1
-            input inputPhone1Alarm
-            input inputPhone1Status
-        }
-        section("Text Message (SMS) #2") {
-            input inputPhone2
-            input inputPhone2Alarm
-            input inputPhone2Status
-        }
-        section("Text Message (SMS) #3") {
-            input inputPhone3
-            input inputPhone3Alarm
-            input inputPhone3Status
-        }
-        section("Text Message (SMS) #4") {
-            input inputPhone4
-            input inputPhone4Alarm
-            input inputPhone4Status
-        }
-        section("Voice Notifications") {
             input inputSpeechDevice
             input inputSpeechOnAlarm
             input inputSpeechOnStatus
@@ -889,11 +938,13 @@ def updated() {
 private def setupInit() {
     TRACE("setupInit()")
 
-    state.installed = false
-    state.version = 2
-    state.armed = false
-    state.alarm = false
-    state.zones = []
+    state.version = buildNumber()
+    if (state.installed == null) {
+        state.installed = false
+        state.armed = false
+        state.alarm = false
+        state.zones = []
+    }
 }
 
 private def initialize() {
@@ -1407,6 +1458,10 @@ private def notify(msg) {
         if (settings.smsAlarmPhone4 && settings.phone4) {
             sendSms(phone4, msg)
         }
+
+        if (settings.pushbulletAlarm && settings.pushbullet) {
+        	settings.pushbullet*.push(msg)
+        }    
     } else {
         // Status change notification
         if (settings.pushStatusMessage) {
@@ -1429,6 +1484,10 @@ private def notify(msg) {
 
         if (settings.smsStatusPhone4 && settings.phone4) {
             sendSms(phone4, msg)
+        }
+
+        if (settings.pushbulletStatus && settings.pushbullet) {
+        	settings.pushbullet*.push(msg)
         }
     }
 }
@@ -1539,6 +1598,15 @@ private def getDeviceById(id) {
     return device
 }
 
+private def getControlPanelUrl(id) {
+    def url = ""
+    if (isRestApiEnabled()) {
+         url = state.restEndpoint + "/cp?access_token=" + state.accessToken
+    }
+
+    return url
+}
+
 private def myRunIn(delay_s, func) {
     TRACE("myRunIn(${delay_s})")
 
@@ -1560,6 +1628,10 @@ private def mySendPush(msg) {
             log.error e
         }
     }
+}
+
+private def buildNumber() {
+    return 3
 }
 
 private def textVersion() {

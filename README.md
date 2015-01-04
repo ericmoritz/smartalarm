@@ -110,7 +110,7 @@ appears below the menu ribbon. Tap it and follow setup instructions.
 
 ### Revision History
 
-**Version 2.2.3. Released TBD**
+**Version 2.2.5. Released 2015-01-03**
 * Take camera snapshots when alarm is triggered.
 * Added support for Pushbullet notifications using
 [Pushbullet](https://github.com/625alex/SmartThings/blob/master/devices/Pushbullet.groovy)

@@ -5,7 +5,7 @@
  *  Please visit <http://statusbits.github.io/smartalarm/> for more
  *  information.
  *
- *  Version 2.2.3 (01/03/2015)
+ *  Version 2.2.5 (01/03/2015)
  *
  *  The latest version of this file can be found on GitHub at:
  *  <https://github.com/statusbits/smartalarm>
@@ -1109,12 +1109,16 @@ def resetPanel() {
 
     unschedule()
     settings.alarms*.off()
-    //settings.switches*.off()
 
     // only turn back off those switches that we turned on
-    TRACE("offSwitches: ${state.offSwitches}")
-    if (state.offSwitches) {
-        state.offSwitches*.off()
+    def switchesOff = state.offSwitches
+    if (switchesOff) {
+        TRACE("switchesOff: ${switchesOff}")
+        settings.switches.each() {
+            if (switchesOff.contains(it.id)) {
+                it.off()
+            }
+        }
         state.offSwitches = []
     }
 
@@ -1398,14 +1402,13 @@ def activateAlarm() {
     // Activate alarms and switches
     if (!settings.silent) {
         settings.alarms*.both()
-        //settings.switches*.on()
 
         // Only turn on those switches that are currently off
         def switchesOn = settings.switches?.findAll { it?.currentSwitch == "off" }
         TRACE("switchesOn: ${switchesOn}")
         if (switchesOn) {
             switchesOn*.on()
-            state.offSwitches = switchesOn
+            state.offSwitches = switchesOn.collect { it.id }
         }
     }
 
@@ -1631,11 +1634,11 @@ private def mySendPush(msg) {
 }
 
 private def buildNumber() {
-    return 3
+    return 150103
 }
 
 private def textVersion() {
-    def text = "Version 2.2.3 (01/03/2015)"
+    def text = "Version 2.2.5 (01/03/2015)"
 }
 
 private def textCopyright() {
@@ -1657,10 +1660,10 @@ private def textLicense() {
 }
 
 private def TRACE(message) {
-    log.debug message
+    //log.debug message
 }
 
 private def STATE() {
-    log.trace "settings: ${settings}"
-    log.trace "state: ${state}"
+    //log.trace "settings: ${settings}"
+    //log.trace "state: ${state}"
 }

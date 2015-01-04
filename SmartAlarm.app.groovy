@@ -46,11 +46,23 @@ mappings {
         action: [ GET: "apiArmAway" ]
     }
 
+    path("/armaway/:pincode") {
+        action: [ GET: "apiArmAway" ]
+    }
+
     path("/armstay") {
         action: [ GET: "apiArmStay" ]
     }
 
+    path("/armstay/:pincode") {
+        action: [ GET: "apiArmStay" ]
+    }
+
     path("/disarm") {
+        action: [ GET: "apiDisarm" ]
+    }
+
+    path("/disarm/:pincode") {
         action: [ GET: "apiDisarm" ]
     }
 
@@ -76,7 +88,7 @@ preferences {
     page name:"pageNotifications"
     page name:"pageZoneStatus"
     page name:"pageRemoteControl"
-    page name:"pageControlPanel"
+    page name:"pageRestApiOptions"
 }
 
 // Show setup page
@@ -118,7 +130,9 @@ def pageSetup() {
             if (state.zones.size()) {
                 href "pageZoneStatus", title:"Zone Status", description:"Tap to open"
             }
-            href hrefControlPanel
+            if (isRestApiEnabled()) {
+                href hrefControlPanel
+            }
         }
         section("Setup Menu") {
             href "pageAlarmSettings", title:"Smart Alarm Settings", description:"Tap to open"
@@ -126,7 +140,7 @@ def pageSetup() {
             href "pageZoneSettings", title:"Zone Settings", description:"Tap to open"
             href "pageNotifications", title:"Notification Options", description:"Tap to open"
             href "pageRemoteControl", title:"Remote Control Settings", description:"Tap to open"
-            href "pageControlPanel", title:"Control Panel Settings", description:"Tap to open"
+            href "pageRestApiOptions", title:"REST API Options", description:"Tap to open"
             href "pageAbout", title:"About Smart Alarm", description:"Tap to open"
         }
         section([title:"Options", mobileOnly:true]) {
@@ -794,12 +808,46 @@ def pageRemoteControl() {
 }
 
 // Show "Control Panel Options" page
-def pageControlPanel() {
-    TRACE("pageControlPanel()")
+def pageRestApiOptions() {
+    TRACE("pageRestApiOptions()")
+
+    def textHelp =
+        "Smart Alarm can be controlled remotely by any Web client using " +
+        "REST API. Please refer to Smart Alarm documentation for more " +
+        "information.\n\n" +
+        "WARNING: Make sure OAuth is enabled in the smart app settings " +
+        "(in SmartThings IDE) before enabling REST API."
+
+    def textPincode =
+        "You can specify optional PIN code to protect arming and disarming " +
+        "Smart Alarm via REST API from unauthorized access. If set, the " +
+        "PIN code is always required for disarming Smart Alarm, however " +
+        "you can optionally turn it off for arming Smart Alarm."
+
+    def inputRestApi = [
+        name:           "restApiEnabled",
+        type:           "bool",
+        title:          "Enable REST API",
+        defaultValue:   false
+    ]
+
+    def inputPincode = [
+        name:           "pincode",
+        type:           "number",
+        title:          "PIN Code",
+        required:       false
+    ]
+
+    def inputArmWithPin = [
+        name:           "armWithPin",
+        type:           "bool",
+        title:          "Require PIN code to arm",
+        defaultValue:   true
+    ]
 
     def pageProperties = [
-        name:       "pageControlPanel",
-        title:      "Control Panel Options",
+        name:       "pageRestApiOptions",
+        title:      "REST API Options",
         nextPage:   "pageSetup",
         install:    false,
         uninstall:  false
@@ -807,6 +855,18 @@ def pageControlPanel() {
 
     return dynamicPage(pageProperties) {
         section {
+            paragraph textHelp
+            input inputRestApi
+            paragraph textPincode
+            input inputPincode
+            input inputArmWithPin
+        }
+
+        if (isRestApiEnabled()) {
+            section("REST API Info") {
+                paragraph "Base URL:\n" + state.restEndpoint
+                paragraph "Access Token:\n" + state.accessToken
+            }
         }
     }
 }
@@ -840,9 +900,6 @@ private def initialize() {
     log.trace "${app.name}. ${textVersion()}. ${textCopyright()}"
 
     state._init_ = true
-    state.restEndpoint = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}"
-    getAccessToken()
-
     state.exitDelay = settings.exitDelay?.toInteger() ?: 0
     state.entryDelay = settings.entryDelay?.toInteger() ?: 0
     state.offSwitches = []
@@ -860,11 +917,31 @@ private def initialize() {
 
     initZones()
     initButtons()
+    initRestApi()
     resetPanel()
     subscribe(location, onLocation)
 
     STATE()
     state._init_ = false
+}
+
+private def initRestApi() {
+    if (settings.restApiEnabled) {
+        if (!state.accessToken) {
+            def token = createAccessToken()
+            TRACE("Created new access token: ${token})")
+        }
+        state.restEndpoint = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}"
+        log.info "REST Endpoint: ${state.restEndpoint}"
+        log.info "Access token: ${state.accessToken}"
+    } else {
+        state.restEndpoint = ""
+        log.info "REST API disabled"
+    }
+}
+
+private def isRestApiEnabled() {
+    return settings.restApiEnabled && state.accessToken
 }
 
 private def initZones() {
@@ -1154,6 +1231,18 @@ def panic() {
 def apiArmAway() {
     TRACE("apiArmAway()")
 
+    if (!isRestApiEnabled()) {
+        log.error "REST API disabled"
+        return httpError(403, "Access denied")
+    }
+
+    if (settings.pincode && settings.armWithPin) {
+        if (params.pincode != settings.pincode.toString()) {
+            log.error "Invalid PIN code '${params.pincode}'"
+            return httpError(403, "Access denied")
+        }
+    }
+
     armAway()
     return apiGetStatus()
 }
@@ -1161,6 +1250,18 @@ def apiArmAway() {
 // .../armstay REST API endpoint
 def apiArmStay() {
     TRACE("apiArmStay()")
+
+    if (!isRestApiEnabled()) {
+        log.error "REST API disabled"
+        return httpError(403, "Access denied")
+    }
+
+    if (settings.pincode && settings.armWithPin) {
+        if (params.pincode != settings.pincode.toString()) {
+            log.error "Invalid PIN code '${params.pincode}'"
+            return httpError(403, "Access denied")
+        }
+    }
 
     armStay()
     return apiGetStatus()
@@ -1170,6 +1271,18 @@ def apiArmStay() {
 def apiDisarm() {
     TRACE("apiDisarm()")
 
+    if (!isRestApiEnabled()) {
+        log.error "REST API disabled"
+        return httpError(403, "Access denied")
+    }
+
+    if (settings.pincode) {
+        if (params.pincode != settings.pincode.toString()) {
+            log.error "Invalid PIN code '${params.pincode}'"
+            return httpError(403, "Access denied")
+        }
+    }
+
     disarm()
     return apiGetStatus()
 }
@@ -1178,6 +1291,11 @@ def apiDisarm() {
 def apiPanic() {
     TRACE("apiPanic()")
 
+    if (!isRestApiEnabled()) {
+        log.error "REST API disabled"
+        return httpError(403, "Access denied")
+    }
+
     panic()
     return apiGetStatus()
 }
@@ -1185,6 +1303,11 @@ def apiPanic() {
 // .../status REST API endpoint
 def apiGetStatus() {
     TRACE("apiGetStatus()")
+
+    if (!isRestApiEnabled()) {
+        log.error "REST API disabled"
+        return httpError(403, "Access denied")
+    }
 
     def status = [:]
     status.status = state.armed ? (state.stay ? "armed stay" : "armed away") : "disarmed"
@@ -1196,6 +1319,11 @@ def apiGetStatus() {
 // .../cp REST API endpoint
 def controlPanel() {
     TRACE("controlPanel()")
+
+    if (!isRestApiEnabled()) {
+        log.error "REST API disabled"
+        return httpError(403, "Access denied")
+    }
 
     def html = '''\
 <!DOCTYPE HTML>
@@ -1256,16 +1384,10 @@ def activateAlarm() {
 
 private def notify(msg) {
     TRACE("notify(${msg})")
-
-    // NOTE: cannot call sendPush() from installed() or updated()
-    if (state._init_) {
-        return
-    }
-
     if (state.alarm) {
         // Alarm notification
         if (settings.pushMessage) {
-            sendPush(msg)
+            mySendPush(msg)
         } else {
             sendNotificationEvent(msg)
         }
@@ -1288,7 +1410,7 @@ private def notify(msg) {
     } else {
         // Status change notification
         if (settings.pushStatusMessage) {
-            sendPush(msg)
+            mySendPush(msg)
         } else {
             sendNotificationEvent(msg)
         }
@@ -1417,17 +1539,6 @@ private def getDeviceById(id) {
     return device
 }
 
-private def getAccessToken() {
-    if (atomicState.accessToken) {
-        return atomicState.accessToken
-    }
-
-    def token = createAccessToken()
-    TRACE("Created new access token: ${token})")
-
-    return token
-}
-
 private def myRunIn(delay_s, func) {
     TRACE("myRunIn(${delay_s})")
 
@@ -1436,6 +1547,18 @@ private def myRunIn(delay_s, func) {
         def date = new Date(tms)
         runOnce(date, func)
         TRACE("'${func}' scheduled to run at ${date}")
+    }
+}
+
+private def mySendPush(msg) {
+    // cannot call sendPush() from installed() or updated()
+    if (!state._init_) {
+        // sendPush can throw an exception
+        try {
+            sendPush(msg)
+        } catch (e) {
+            log.error e
+        }
     }
 }
 

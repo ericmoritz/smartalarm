@@ -111,7 +111,10 @@ appears below the menu ribbon. Tap it and follow setup instructions.
 ### Revision History
 
 **Version 2.2.3. Released TBD**
-* Can now take camera snapshots when alarm is triggered.
+* Take camera snapshots when alarm is triggered.
+* Added optional PIN code for arming/disarming via REST API.
+* REST API is now disabled by default. You can enable it in the "REST API
+Options" menu.
 * Miscellaneous bug fixes.
 
 **Version 2.2.1. Released 2014-12-06**

@@ -5,7 +5,7 @@
  *  Please visit <http://statusbits.github.io/smartalarm/> for more
  *  information.
  *
- *  Version 2.2.5 (01/03/2015)
+ *  Version 2.3 (01/07/2015)
  *
  *  The latest version of this file can be found on GitHub at:
  *  <https://github.com/statusbits/smartalarm>
@@ -72,6 +72,18 @@ mappings {
 
     path("/status") {
         action: [ GET: "apiGetStatus" ]
+    }
+
+    path("/system") {
+        action: [ GET: "apiSystem" ]
+    }
+
+    path("/rooms") {
+        action: [ GET: "apiRooms" ]
+    }
+
+    path("/devices") {
+        action: [ GET: "apiDevices" ]
     }
 
     path("/cp") {
@@ -982,11 +994,10 @@ private def initRestApi() {
             def token = createAccessToken()
             TRACE("Created new access token: ${token})")
         }
-        state.restEndpoint = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}"
-        log.info "REST Endpoint: ${state.restEndpoint}"
-        log.info "Access token: ${state.accessToken}"
+        state.url = "https://graph.api.smartthings.com/api/token/${state.accessToken}/smartapps/installations/${app.id}/"
+        log.info "REST API enabled"
     } else {
-        state.restEndpoint = ""
+        state.url = ""
         log.info "REST API disabled"
     }
 }
@@ -1371,6 +1382,40 @@ def apiGetStatus() {
     return status
 }
 
+// .../system REST API endpoint
+def apiSystem() {
+    TRACE("apiSystem()")
+
+    def response = [
+        id          : app.id,
+        apiversion  : 1
+    ]
+
+    return response
+}
+
+// .../rooms REST API endpoint
+def apiRooms() {
+    TRACE("apiRooms()")
+
+    def response = [
+        rooms : []
+    ]
+
+    return response
+}
+
+// .../devices REST API endpoint
+def apiDevices() {
+    TRACE("apiDevices()")
+
+    def response = [
+        devices : []
+    ]
+
+    return response
+}
+
 // .../cp REST API endpoint
 def controlPanel() {
     TRACE("controlPanel()")
@@ -1553,11 +1598,7 @@ private def getStatusPhrase() {
 }
 
 private def getHelloHomeActions() {
-    def actions = []
-    location.helloHome?.getPhrases().each {
-        actions << "${it.label}"
-    }
-
+    def actions = location.helloHome?.getPhrases().collect() { it.label }
     return actions.sort()
 }
 
@@ -1601,13 +1642,12 @@ private def getDeviceById(id) {
     return device
 }
 
-private def getControlPanelUrl(id) {
-    def url = ""
+private def getControlPanelUrl() {
     if (isRestApiEnabled()) {
-         url = state.restEndpoint + "/cp?access_token=" + state.accessToken
+         return "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/cp?access_token=${state.accessToken}"
     }
 
-    return url
+    return ""
 }
 
 private def myRunIn(delay_s, func) {
@@ -1634,11 +1674,11 @@ private def mySendPush(msg) {
 }
 
 private def buildNumber() {
-    return 150103
+    return 150107
 }
 
 private def textVersion() {
-    def text = "Version 2.2.5 (01/03/2015)"
+    def text = "Version 2.3 (01/07/2015)"
 }
 
 private def textCopyright() {
@@ -1660,10 +1700,10 @@ private def textLicense() {
 }
 
 private def TRACE(message) {
-    //log.debug message
+    log.debug message
 }
 
 private def STATE() {
-    //log.trace "settings: ${settings}"
-    //log.trace "state: ${state}"
+    log.trace "settings: ${settings}"
+    log.trace "state: ${state}"
 }

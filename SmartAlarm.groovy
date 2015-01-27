@@ -5,10 +5,10 @@
  *  Please visit <http://statusbits.github.io/smartalarm/> for more
  *  information.
  *
- *  Version 2.3 (01/07/2015)
+ *  Version 2.2.6 (01/27/2015)
  *
  *  The latest version of this file can be found on GitHub at:
- *  <https://github.com/statusbits/smartalarm>
+ *  <https://github.com/statusbits/smartalarm/blob/master/SmartAlarm.groovy>
  *
  *  --------------------------------------------------------------------------
  *
@@ -73,22 +73,6 @@ mappings {
     path("/status") {
         action: [ GET: "apiGetStatus" ]
     }
-
-    path("/system") {
-        action: [ GET: "apiSystem" ]
-    }
-
-    path("/rooms") {
-        action: [ GET: "apiRooms" ]
-    }
-
-    path("/devices") {
-        action: [ GET: "apiDevices" ]
-    }
-
-    path("/cp") {
-        action: [ GET: "controlPanel" ]
-    }
 }
 
 preferences {
@@ -121,14 +105,6 @@ def pageSetup() {
         alarmStatus = "disarmed"
     }
 
-    def hrefControlPanel = [
-        url:        getControlPanelUrl(),
-        style:      "embedded",
-        title:      "Control Panel",
-        description:"Tap to launch control panel...",
-        required:   false
-    ]
-
     def pageProperties = [
         name:       "pageSetup",
         title:      "Status",
@@ -143,9 +119,6 @@ def pageSetup() {
             if (state.zones.size()) {
                 href "pageZoneStatus", title:"Zone Status", description:"Tap to open"
             }
-            //if (isRestApiEnabled()) {
-            //    href hrefControlPanel
-            //}
         }
         section("Setup Menu") {
             href "pageAlarmSettings", title:"Smart Alarm Settings", description:"Tap to open"
@@ -942,8 +915,8 @@ def installed() {
 def updated() {
     TRACE("updated()")
 
-    unschedule()
     unsubscribe()
+    unschedule()
     initialize()
 }
 
@@ -994,7 +967,7 @@ private def initRestApi() {
             def token = createAccessToken()
             TRACE("Created new access token: ${token})")
         }
-        state.url = "https://graph.api.smartthings.com/api/token/${state.accessToken}/smartapps/installations/${app.id}/"
+        state.url = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/"
         log.info "REST API enabled"
     } else {
         state.url = ""
@@ -1382,60 +1355,6 @@ def apiGetStatus() {
     return status
 }
 
-// .../system REST API endpoint
-def apiSystem() {
-    TRACE("apiSystem()")
-
-    def response = [
-        id          : app.id,
-        apiversion  : 1
-    ]
-
-    return response
-}
-
-// .../rooms REST API endpoint
-def apiRooms() {
-    TRACE("apiRooms()")
-
-    def response = [
-        rooms : []
-    ]
-
-    return response
-}
-
-// .../devices REST API endpoint
-def apiDevices() {
-    TRACE("apiDevices()")
-
-    def response = [
-        devices : []
-    ]
-
-    return response
-}
-
-// .../cp REST API endpoint
-def controlPanel() {
-    TRACE("controlPanel()")
-
-    if (!isRestApiEnabled()) {
-        log.error "REST API disabled"
-        return httpError(403, "Access denied")
-    }
-
-    def html = '''\
-<!DOCTYPE HTML>
-<html lang="en-US">
-<head><title>Smart Alarm</title></head>
-<body><h2>Coming soon...</h2></body>
-</html>
-'''
-
-    render contentType:"text/html", data: html
-}
-
 def activateAlarm() {
     TRACE("activateAlarm()")
 
@@ -1642,14 +1561,6 @@ private def getDeviceById(id) {
     return device
 }
 
-private def getControlPanelUrl() {
-    if (isRestApiEnabled()) {
-         return "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/cp?access_token=${state.accessToken}"
-    }
-
-    return ""
-}
-
 private def myRunIn(delay_s, func) {
     TRACE("myRunIn(${delay_s})")
 
@@ -1674,11 +1585,11 @@ private def mySendPush(msg) {
 }
 
 private def buildNumber() {
-    return 150107
+    return 150127
 }
 
 private def textVersion() {
-    def text = "Version 2.3 (01/07/2015)"
+    def text = "Version 2.2.6 (01/27/2015)"
 }
 
 private def textCopyright() {
@@ -1700,10 +1611,10 @@ private def textLicense() {
 }
 
 private def TRACE(message) {
-    log.debug message
+    //log.debug message
 }
 
 private def STATE() {
-    log.trace "settings: ${settings}"
-    log.trace "state: ${state}"
+    //log.trace "settings: ${settings}"
+    //log.trace "state: ${state}"
 }

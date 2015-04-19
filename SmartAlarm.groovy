@@ -31,7 +31,7 @@
 import groovy.json.JsonSlurper
 
 definition(
-    name: "Smart Alarm",
+    name: "Smart Alarm-authArrival",
     namespace: "statusbits",
     author: "geko@statusbits.com",
     description: "The ultimate home security application for SmartThings.",
@@ -384,6 +384,11 @@ def pageAlarmSettings() {
         "armed and disarm it within specified time without setting off an " +
         "alarm. Entry delay can be optionally disabled in Stay mode."
 
+    def helpAuthorizedArrivals =
+        "Authorized Arrivals will ignore any alarms triggered during the " +
+        "entry delay. When the entry delay expires, new alarms will " +
+        "trigger alarms"
+          
     def helpAlarm =
         "When an alarm is set off, Smart Alarm can turn on sirens and light" +
         "switches, take camera snapshots and execute a 'Hello, Home' action."
@@ -433,6 +438,13 @@ def pageAlarmSettings() {
         title:          "Entry delay (in seconds)",
         defaultValue:   "30",
         required:       true
+    ]
+
+    def inputAuthorizedArrivals = [
+        name:           "authorizedArrivals",
+        type:           "capability.presenceSensor",
+        multiple:       true,
+        required:       false
     ]
 
     def inputEntryDelayDisable = [
@@ -505,6 +517,11 @@ def pageAlarmSettings() {
             input inputEntryDelay
             input inputEntryDelayDisable
         }
+        section("Authorized Arrivals") {
+            paragraph helpAuthorizedArrivals
+            input inputAuthorizedArrivals
+        }
+
         section("Alarm Options") {
             paragraph helpAlarm
             input inputAlarms
@@ -956,7 +973,7 @@ private def initialize() {
     initRestApi()
     resetPanel()
     subscribe(location, onLocation)
-
+    subscribe(authorizedArrivals, "presence.present", onAuthArrival)
     STATE()
     state._init_ = false
 }
@@ -1164,6 +1181,13 @@ private def onZoneEvent(evt, sensorType) {
         return
     }
 
+    if (state.ignoreAlarm) {
+      // We're ignoring alarm events for now
+      // we should notify about this
+      log.info "alarm was was ignored due to authorized arrival"
+      return 
+    }
+
     // Activate alarm
     state.alarm = true
     if (zone.entrance && state.entryDelay && !(state.stay && settings.entryDelayDisable)) {
@@ -1177,6 +1201,21 @@ def onContact(evt)  { onZoneEvent(evt, "contact") }
 def onMotion(evt)   { onZoneEvent(evt, "motion") }
 def onSmoke(evt)    { onZoneEvent(evt, "smoke") }
 def onWater(evt)    { onZoneEvent(evt, "water") }
+
+def onAuthArrival(evt) {
+  log.trace "${evt.value} arrived, ignoring triggred alarms for ${state.entryDelay} seconds"
+  
+  // turn on ignoreAlarm
+  state.ignoreAlarm = true
+
+  // after entryDelay, turn off ignoreAlarm
+  myRunIn(state.entryDelay, disableIgnoreAlarm)
+}
+
+def disableIgnoreAlarm() {
+  log.trace "arrival alarm ignore timeout, alarms reenabled"
+  state.ignoreAlarm = false
+}
 
 def onLocation(evt) {
     TRACE("onLocation(${evt.value})")

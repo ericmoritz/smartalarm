@@ -443,6 +443,7 @@ def pageAlarmSettings() {
     def inputAuthorizedArrivals = [
         name:           "authorizedArrivals",
         type:           "capability.presenceSensor",
+        title:          "Who is authorized?",
         multiple:       true,
         required:       false
     ]
@@ -1183,8 +1184,8 @@ private def onZoneEvent(evt, sensorType) {
 
     if (state.ignoreAlarm) {
       // We're ignoring alarm events for now
-      // we should notify about this
       log.info "alarm was was ignored due to authorized arrival"
+      notifyStatus "Alarm was was ignored due to authorized arrival"
       return 
     }
 
@@ -1203,7 +1204,9 @@ def onSmoke(evt)    { onZoneEvent(evt, "smoke") }
 def onWater(evt)    { onZoneEvent(evt, "water") }
 
 def onAuthArrival(evt) {
-  log.trace "${evt.value} arrived, ignoring triggred alarms for ${state.entryDelay} seconds"
+  def msg = "${evt.value} arrived, ignoring triggred alarms for ${state.entryDelay} seconds"
+  log.trace msg
+  notifyStatus msg
   
   // turn on ignoreAlarm
   state.ignoreAlarm = true
@@ -1213,7 +1216,9 @@ def onAuthArrival(evt) {
 }
 
 def disableIgnoreAlarm() {
-  log.trace "arrival alarm ignore timeout, alarms reenabled"
+  def msg = "arrival alarm ignore timeout, alarms reenabled"
+  log.trace msg
+  notifyStatus msg
   state.ignoreAlarm = false
 }
 
@@ -1469,6 +1474,11 @@ private def notify(msg) {
         	settings.pushbullet*.push(msg)
         }    
     } else {
+      notifyStatus(msg)
+    }
+}
+
+private def notifyStatus(msg) {
         // Status change notification
         if (settings.pushStatusMessage) {
             mySendPush(msg)
@@ -1495,7 +1505,6 @@ private def notify(msg) {
         if (settings.pushbulletStatus && settings.pushbullet) {
         	settings.pushbullet*.push(msg)
         }
-    }
 }
 
 private def notifyVoice() {
